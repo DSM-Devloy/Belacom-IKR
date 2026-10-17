@@ -1612,6 +1612,9 @@ function deleteWO(noTiket) {
                 <button class="btn btn-sm btn-outline-danger mb-1" onclick="generatePDF('${item.noTiket}', this)" title="Export PDF">
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
+                <button class="btn btn-sm btn-outline-dark mb-1" onclick="generatePhotoPDF('${item.noTiket}', this)" title="PDF Photo Documentation">
+                  <i class="fa-solid fa-images"></i> PDF Foto
+                </button>
               </td>
             </tr>
           `;
@@ -2107,6 +2110,25 @@ function deleteWO(noTiket) {
     function openWhatsApp() {
       const text = encodeURIComponent(document.getElementById('wa-text-area').value);
       window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function generatePhotoPDF(noTiket, btn) {
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Engine...';
+
+      google.script.run
+        .withSuccessHandler(pdfUrl => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          window.open(pdfUrl, '_blank');
+        })
+        .withFailureHandler(err => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          alert('Gagal: ' + err.message);
+        })
+        .generatePhotoDocPDF(noTiket);
     }
 
     function generatePDF(noTiket, btn) {
