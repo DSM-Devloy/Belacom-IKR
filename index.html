@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>BELACOM IKR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+    
+    /* LOGIN PAGE STYLE */
+    #login-container { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #1a1a1a 0%, #C8102E 100%); }
+    .login-card { width: 100%; max-width: 400px; padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+    .wrapper { display: flex; width: 100%; min-height: 100vh; position: relative; overflow-x: hidden; }
+    
+    /* SIDEBAR AUTOHIDE STYLING */
+    #sidebar { 
+      min-width: 240px; 
+      max-width: 240px; 
+      background: #1a1a1a; 
+      color: #fff; 
+      transition: all 0.3s ease-in-out; 
+      display: flex; 
+      flex-direction: column; 
+      position: relative;
+      z-index: 1000;
+    }
+    
+    #sidebar.hidden {
+      margin-left: -240px;
+    }
+
+    #sidebar .sidebar-header { padding: 20px 15px; background: #000000; border-bottom: 2px solid #C8102E; display: flex; align-items: center; }
+    #sidebar .sidebar-header h4 { margin: 0; font-size: 1.1rem; font-weight: bold; color: #fff; display: flex; align-items: center; }
+    #sidebar .sidebar-header i { color: #C8102E; margin-right: 10px; font-size: 1.3rem; }
+    
+    .sidebar-toggle-logo {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .sidebar-toggle-logo:hover {
+      transform: scale(1.08);
+      opacity: 0.9;
+    }
+
+    #sidebar ul.components { padding: 15px 0; margin: 0; list-style: none; flex-grow: 1; }
+    #sidebar ul li a { padding: 12px 20px; font-size: 0.95rem; display: block; color: #ccc; text-decoration: none; transition: 0.2s; border-left: 4px solid transparent; }
+    #sidebar ul li a:hover { color: #fff; background: #2a2a2a; }
+    #sidebar ul li.active a { color: #fff; background: #282828; border-left-color: #C8102E; font-weight: 600; }
+    #sidebar ul li a i { margin-right: 12px; width: 20px; text-align: center; }
+
+    #content { width: 100%; padding: 25px 30px; background-color: #f4f6f9; transition: all 0.3s ease-in-out; }
+    .card-custom { border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff; margin-bottom: 20px; }
+    
+    /* Styling interaktif untuk Kartu Dashboard clickable */
+    .dashboard-card-clickable {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dashboard-card-clickable:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      background-color: #fafbfc;
+    }
+
+    .btn-belacom { background-color: #C8102E; color: white; border: none; }
+    .btn-belacom:hover { background-color: #a00c23; color: white; }
+    .table-custom { background: #fff; border-radius: 8px; overflow: hidden; }
+    .table-custom thead { background-color: #fafafa; border-bottom: 2px solid #edf2f7; }
+    .table-custom th { font-weight: 600; text-transform: uppercase; font-size: 0.78rem; color: #4a5568; letter-spacing: 0.5px; padding: 12px 15px; }
+    .table-custom td { padding: 12px 15px; vertical-align: middle; font-size: 0.88rem; }
+    
+    .search-box { max-width: 300px; }
+    .chart-container { position: relative; min-height: 260px; }
+    
+    .pic-checkbox-container {
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+      padding: 8px 12px;
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-container">
+    <div class="login-card">
+      <div class="text-center mb-4">
+        <img src="https://lh3.googleusercontent.com/d/1zqMznic_hDhGnI9E-2PMiyKXnuxWo5JF" alt="Logo Belacom" style="max-height: 70px; margin-bottom: 12px; object-fit: contain;">
+        <h3 class="fw-bold text-dark">BELACOM IKR</h3>
+        <p class="text-muted small">Silakan login untuk mengakses sistem</p>
+      </div>
+      <form id="formLogin" onsubmit="handleLogin(event)">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Username</label>
+          <input type="text" id="login-user" class="form-control" required placeholder="Masukkan username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Password</label>
+          <input type="password" id="login-pass" class="form-control" required placeholder="Masukkan password">
+        </div>
+        <div id="login-error" class="text-danger small mb-3 text-center" style="display: none;"></div>
+        <button type="submit" class="btn btn-belacom w-100 py-2 fw-bold"><i class="fa-solid fa-right-to-bracket me-1"></i> Login Sistem</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APLIKASI UTAMA -->
+  <div id="app-wrapper" class="wrapper" style="display: none;">
+    <!-- SIDEBAR NAV -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <h4>
+          <img src="https://lh3.googleusercontent.com/d/1zqMznic_hDhGnI9E-2PMiyKXnuxWo5JF" 
+               class="sidebar-toggle-logo" 
+               style="max-height: 30px; margin-right: 8px; object-fit: contain;" 
+               alt="Logo Belacom" 
+               onclick="toggleSidebar()" 
+               title="Klik untuk menyembunyikan sidebar"> 
+          BELACOM IKR
+        </h4>
+      </div>
+
+      <ul class="list-unstyled components">
+        <li class="active" id="nav-dashboard"><a href="#" onclick="showSection('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard WO</a></li>
+        <li id="nav-dash-tagihan"><a href="#" onclick="showSection('dash-tagihan')"><i class="fa-solid fa-chart-pie"></i> Dashboard Tagihan</a></li>
+        <li id="nav-wo"><a href="#" onclick="showSection('wo')"><i class="fa-solid fa-list-check"></i> List WO</a></li>
+        <li id="nav-report"><a href="#" onclick="showSection('report')"><i class="fa-solid fa-file-contract"></i> List Report IKR</a></li>
+        <li id="nav-tagihan"><a href="#" onclick="showSection('tagihan')"><i class="fa-solid fa-receipt"></i> List Tagihan</a></li>
+        <li id="nav-setting" class="admin-only" style="display: none;"><a href="#" onclick="showSection('setting')"><i class="fa-solid fa-gears"></i> Menu Setting</a></li>
+      </ul>
+
+      <div class="p-3 bg-black border-top border-secondary text-center">
+        <small class="text-muted d-block">Login sebagai:</small>
+        <strong id="user-display-name" class="text-warning small">-</strong><br>
+        <span id="user-display-role" class="badge bg-danger mt-1">Role</span>
+        <button class="btn btn-outline-light btn-sm w-100 mt-2" onclick="logout()"><i class="fa-solid fa-power-off me-1"></i> Logout</button>
+        
+        <div class="mt-3 pt-2 border-top border-secondary text-muted" style="font-size: 11px;">
+          <div>BELACOM IKR <strong>v2.5.0</strong></div>
+          <div class="mt-1" style="font-size: 10px; color: #888;">&copy; 2026 PT. Belacom Teknologi Indonesia, Created by Dian S.M</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div id="content">
+
+      <!-- TOMBOL TOGGLE SIDEBAR -->
+      <div class="mb-3">
+        <button class="btn btn-outline-dark btn-sm shadow-sm" id="btn-show-sidebar" onclick="toggleSidebar()" title="Tampilkan Sidebar">
+          <img src="https://lh3.googleusercontent.com/d/1zqMznic_hDhGnI9E-2PMiyKXnuxWo5JF" style="max-height: 20px; object-fit: contain;" alt="Logo Belacom">
+          <i class="fa-solid fa-bars ms-1"></i> Menu Sidebar
+        </button>
+      </div>
+
+      <!-- GLOBAL FILTER PANEL -->
+      <div class="card card-custom p-3 mb-4 border-start border-4 border-danger">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0"><i class="fa-solid fa-filter me-2 text-danger"></i>Filter Global Data Sistem</h6>
+          <span class="text-muted small">Filter ini akan diterapkan di semua menu secara otomatis</span>
+        </div>
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Dari Tanggal (Periode)</label>
+            <input type="date" id="global-start-date" class="form-control form-control-sm">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Sampai Tanggal (Periode)</label>
+            <input type="date" id="global-end-date" class="form-control form-control-sm">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">Status WO</label>
+            <select id="global-status-wo" class="form-select form-select-sm">
+              <option value="">Semua Status</option>
+              <option value="Done">Done</option>
+              <option value="On Progress">On Progress</option>
+              <option value="On Schedule">On Schedule</option>
+              <option value="Reschedule">Reschedule</option>
+              <option value="Pending">Pending</option>
+              <option value="Hold To Sales">Hold To Sales</option>
+              <option value="Hold To Planning">Hold To Planning</option>
+              <option value="Hold To Maintenance">Hold To Maintenance</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">Team Aktivator</label>
+            <select id="global-team-activator" class="form-select form-select-sm">
+              <option value="">Semua Team</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-belacom btn-sm w-100" onclick="applyGlobalFilter()"><i class="fa-solid fa-search me-1"></i> Terapkan</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="resetGlobalFilter()" title="Reset Filter"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- SECTION 1: DASHBOARD WO -->
+      <div id="sec-dashboard" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-bold mb-0">Dashboard Work Order Overview <small class="text-muted fs-6" style="font-size: 12px !important;">(Klik kartu untuk melihat detail list WO)</small></h4>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadDashboard()"><i class="fa-solid fa-rotate me-1"></i> Refresh Dashboard</button>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <div class="card card-custom p-3 border-start border-4 border-dark dashboard-card-clickable" onclick="openDashboardDetailModal('ALL', 'Semua Work Order')">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted fw-bold">TOTAL WORK ORDER</small>
+                  <h3 id="dash-total" class="mt-2 fw-bold mb-0">0</h3>
+                </div>
+                <div><i class="fa-solid fa-list-ul fa-2x text-muted"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-success dashboard-card-clickable" onclick="openDashboardDetailModal('Done', 'Work Order Status: Done')">
+              <small class="text-muted fw-bold">DONE</small>
+              <h3 id="dash-done" class="mt-2 text-success fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-primary dashboard-card-clickable" onclick="openDashboardDetailModal('On Progress', 'Work Order Status: On Progress')">
+              <small class="text-muted fw-bold">ON PROGRESS</small>
+              <h3 id="dash-onprogress" class="mt-2 text-primary fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-info dashboard-card-clickable" onclick="openDashboardDetailModal('On Schedule', 'Work Order Status: On Schedule')">
+              <small class="text-muted fw-bold">ON SCHEDULE</small>
+              <h3 id="dash-onschedule" class="mt-2 text-info fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-warning dashboard-card-clickable" onclick="openDashboardDetailModal('Reschedule', 'Work Order Status: Reschedule')">
+              <small class="text-muted fw-bold">RESCHEDULE</small>
+              <h3 id="dash-reschedule" class="mt-2 text-warning fw-bold mb-0">0</h3>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-danger dashboard-card-clickable" onclick="openDashboardDetailModal('Pending', 'Work Order Status: Pending')">
+              <small class="text-muted fw-bold">PENDING</small>
+              <h3 id="dash-pending" class="mt-2 text-danger fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-secondary dashboard-card-clickable" onclick="openDashboardDetailModal('Hold To Sales', 'Work Order Status: Hold To Sales')">
+              <small class="text-muted fw-bold">HOLD TO SALES</small>
+              <h3 id="dash-hold-sales" class="mt-2 text-secondary fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-secondary dashboard-card-clickable" onclick="openDashboardDetailModal('Hold To Planning', 'Work Order Status: Hold To Planning')">
+              <small class="text-muted fw-bold">HOLD TO PLANNING</small>
+              <h3 id="dash-hold-planning" class="mt-2 text-secondary fw-bold mb-0">0</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card card-custom p-3 border-start border-4 border-secondary dashboard-card-clickable" onclick="openDashboardDetailModal('Hold To Maintenance', 'Work Order Status: Hold To Maintenance')">
+              <small class="text-muted fw-bold">HOLD TO MAINTENANCE</small>
+              <h3 id="dash-hold-maint" class="mt-2 text-secondary fw-bold mb-0">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-12">
+            <div class="card card-custom p-3">
+              <h6 class="fw-bold mb-3"><i class="fa-solid fa-chart-column me-2 text-primary"></i>Grafik Pencapaian Team Berdasarkan Status WO</h6>
+              <div class="chart-container" style="position: relative; height:360px;">
+                <canvas id="chartTeamStatus"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: DASHBOARD TAGIHAN & ANALISA -->
+      <div id="sec-dash-tagihan" class="page-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-bold mb-0">Dashboard & Analisis Tagihan</h4>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadBillingDashboard()"><i class="fa-solid fa-rotate me-1"></i> Refresh Analisis</button>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4 mb-3">
+            <div class="card card-custom p-3 border-start border-4 border-primary h-100">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted fw-bold">TOTAL TAGIHAN CLIENT</small>
+                  <h3 id="dash-bill-total" class="mt-2 fw-bold text-primary mb-0">Rp 0</h3>
+                  <small class="text-muted" id="dash-bill-wo-count">0 Work Order</small>
+                </div>
+                <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary"><i class="fa-solid fa-wallet fa-2x"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card card-custom p-3 border-start border-4 border-warning h-100">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted fw-bold">TOTAL PEMBAYARAN TEAM (75%)</small>
+                  <h3 id="dash-bill-team" class="mt-2 fw-bold text-warning mb-0">Rp 0</h3>
+                  <small class="text-muted">Alokasi ke Teknisi/Team</small>
+                </div>
+                <div class="p-3 bg-warning bg-opacity-10 rounded-circle text-warning"><i class="fa-solid fa-users-gear fa-2x"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card card-custom p-3 border-start border-4 border-success h-100">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted fw-bold">TOTAL REVENUE BELACOM (25%)</small>
+                  <h3 id="dash-bill-revenue" class="mt-2 fw-bold text-success mb-0">Rp 0</h3>
+                  <small class="text-muted">Laba Bersih Belacom</small>
+                </div>
+                <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success"><i class="fa-solid fa-chart-line fa-2x"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <div class="card card-custom p-3 border-start border-4 border-success h-100">
+              <small class="text-muted fw-bold">TOTAL DIBAYAR (PAID)</small>
+              <h3 id="dash-bill-paid" class="mt-2 text-success fw-bold mb-0">Rp 0</h3>
+              <small class="text-muted" id="dash-bill-paid-count">0 WO Lunas</small>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="card card-custom p-3 border-start border-4 border-danger h-100">
+              <small class="text-muted fw-bold">TOTAL TUNGGAKAN (UNPAID)</small>
+              <h3 id="dash-bill-unpaid" class="mt-2 text-danger fw-bold mb-0">Rp 0</h3>
+              <small class="text-muted" id="dash-bill-unpaid-count">0 WO Belum Lunas</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4 mb-3">
+            <div class="card card-custom p-3 h-100">
+              <h6 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Rasio Kelunasan Pembayaran</h6>
+              <div class="chart-container d-flex align-items-center justify-content-center">
+                <canvas id="chartPaymentStatus"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8 mb-3">
+            <div class="card card-custom p-3 h-100">
+              <h6 class="fw-bold mb-3"><i class="fa-solid fa-chart-column me-2 text-danger"></i>Finansial per Team Aktivator</h6>
+              <div class="chart-container">
+                <canvas id="chartTeamFinancial"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-custom p-3 mb-4">
+          <h6 class="fw-bold mb-3"><i class="fa-solid fa-table-list me-2 text-secondary"></i>Analisis Pembayaran & Revenue Per Team Aktivator</h6>
+          <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Nama Team</th>
+                  <th class="text-center">Total WO</th>
+                  <th class="text-center">Lunas (Paid)</th>
+                  <th class="text-center">Belum (Unpaid)</th>
+                  <th>Total Tagihan</th>
+                  <th>Bayar Team</th>
+                  <th>Revenue Belacom</th>
+                  <th class="text-center">% Kelunasan</th>
+                </tr>
+              </thead>
+              <tbody id="tb-dash-team-billing">
+                <tr><td colspan="8" class="text-center py-4">Memuat data analisis team...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+<!-- SECTION 2: LIST WORK ORDER (WO) -->
+      <div id="sec-wo" class="page-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">List Work Order (WO)</h4>
+          <div class="d-flex gap-2">
+            <div class="input-group search-box">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="search-wo" class="form-control" placeholder="Cari WO, Customer, Team..." onkeyup="filterWO()">
+            </div>
+            <!-- Tombol Export Excel WO -->
+            <button class="btn btn-success text-nowrap" onclick="exportWOExcel()"><i class="fa-solid fa-file-excel me-1"></i> Export Excel</button>
+            <button class="btn btn-belacom text-nowrap" onclick="openWOModal()"><i class="fa-solid fa-plus me-1"></i> WO Baru</button>
+          </div>
+        </div>
+        <div class="card card-custom p-3">
+          <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>No Tiket</th>
+                  <th>Customer</th>
+                  <th>No Telp</th>
+                  <th>Alamat</th>
+                  <th>Team / PIC</th>
+                  <th>Tgl Visit</th>
+                  <th>Status WO</th>
+                  <th class="text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tb-wo"><tr><td colspan="8" class="text-center py-4">Memuat data WO...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: LIST REPORT IKR -->
+      <div id="sec-report" class="page-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">List Report IKR</h4>
+          <div class="d-flex gap-2">
+            <div class="input-group search-box">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="search-report" class="form-control" placeholder="Cari Tiket, Customer, Team..." onkeyup="filterReport()">
+            </div>
+            <!-- Tombol Export Excel Report IKR -->
+            <button class="btn btn-success text-nowrap" onclick="exportReportExcel()"><i class="fa-solid fa-file-excel me-1"></i> Export Excel</button>
+            <button class="btn btn-outline-secondary btn-sm text-nowrap" onclick="loadReportList()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="card card-custom p-3">
+          <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+              <thead>
+                <tr>
+                 <th>No Tiket</th>
+                  <th>Customer</th>
+                  <th>No Telp</th>
+                  <th>Alamat</th>
+                  <th>Team / PIC</th>
+                  <th>Tgl Visit</th>
+                  <th>Status WO</th>
+                  <th class="text-center">Aksi Engine</th>
+                </tr>
+              </thead>
+              <tbody id="tb-report"><tr><td colspan="5" class="text-center py-4">Memuat data Report...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: LIST TAGIHAN & PEMBAYARAN -->
+      <div id="sec-tagihan" class="page-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">List Tagihan & Perhitungan Pembayaran</h4>
+          <div class="d-flex gap-2">
+            <div class="input-group search-box">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="search-tagihan" class="form-control" placeholder="Cari Tiket, Customer, Team..." onkeyup="filterTagihan()">
+            </div>
+            <button class="btn btn-outline-secondary btn-sm text-nowrap" onclick="loadWOList()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+          </div>
+        </div>
+
+        <div class="card card-custom p-3">
+          <div class="table-responsive">
+            <table class="table table-custom table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>No Tiket</th>
+                  <th>Customer</th>
+                  <th>Team Aktivator</th>
+                  <th>Tagihan WO</th>
+                  <th>Bayar Team IKR</th>
+                  <th>Revenue Belacom</th>
+                  <th>Tgl Bayar</th>
+                  <th>Status Bayar</th>
+                  <th class="text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tb-tagihan"><tr><td colspan="9" class="text-center py-4">Memuat data tagihan...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: MENU SETTING -->
+      <div id="sec-setting" class="page-section" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-bold mb-0"><i class="fa-solid fa-gears me-2 text-danger"></i>Menu Setting & Manajemen Sistem</h4>
+        </div>
+
+        <!-- PENGATURAN HARGA & TANGGAL EFEKTIF -->
+        <div class="row">
+          <div class="col-12 mb-4">
+            <div class="card card-custom p-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="fw-bold mb-0"><i class="fa-solid fa-tags me-2 text-warning"></i>Pengaturan Harga WO</h6>
+                <button class="btn btn-sm btn-warning fw-bold" onclick="openPriceModal()"><i class="fa-solid fa-plus me-1"></i> Tambah Harga Baru</button>
+              </div>
+              <p class="text-muted small mb-3">Harga setiap WO ditentukan oleh <strong>Tgl Visit</strong>: sistem memakai harga dengan tanggal efektif terdekat yang tidak melewati Tgl Visit. Riwayat disimpan agar laporan lama tidak berubah.</p>
+              <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>Berlaku Mulai</th>
+                      <th>Status</th>
+                      <th class="text-end">Tagihan WO</th>
+                      <th class="text-end">Bayar Team IKR</th>
+                      <th class="text-end">Revenue Belacom</th>
+                      <th>Catatan / Diubah Oleh</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tb-prices">
+                    <tr><td colspan="7" class="text-center py-3">Memuat pengaturan harga...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="card card-custom p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="fa-solid fa-users-gear me-2 text-primary"></i>Daftar Akses User Sistem</h6>
+                <button class="btn btn-sm btn-belacom" onclick="openUserModal()"><i class="fa-solid fa-user-plus me-1"></i> Tambah User</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Nama</th>
+                      <th>Role</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tb-users">
+                    <tr><td colspan="4" class="text-center py-3">Memuat data user...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-4">
+            <div class="card card-custom p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="fa-solid fa-people-group me-2 text-success"></i>Daftar Team Aktivator IKR</h6>
+                <button class="btn btn-sm btn-success" onclick="openTeamModal()"><i class="fa-solid fa-plus me-1"></i> Tambah Team</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>Nama Team</th>
+                      <th>PIC / Teknisi</th>
+                      <th>No Telp PIC</th>
+                      <th class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tb-teams-setting">
+                    <tr><td colspan="4" class="text-center py-3">Memuat data team...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- POP-UP MODAL LIST WO DASHBOARD -->
+  <div class="modal fade" id="modalDashDetailWO" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold" id="dash-modal-title"><i class="fa-solid fa-list-check me-2"></i>Detail Work Order</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-light">
+          <div class="card card-custom p-3 mb-0">
+            <div class="table-responsive">
+              <table class="table table-custom table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>No Tiket</th>
+                    <th>Customer</th>
+                    <th>No Telp</th>
+                    <th>Alamat</th>
+                    <th>Team / PIC</th>
+                    <th>Tgl Visit</th>
+                    <th>Status WO</th>
+                  </tr>
+                </thead>
+                <tbody id="tb-dash-modal-wo">
+                  <tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL USER -->
+  <div class="modal fade" id="modalUser" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalUserTitle">Form User Sistem</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formUser">
+            <input type="hidden" id="user-rowIndex">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Username</label>
+              <input type="text" id="user-username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Password</label>
+              <input type="text" id="user-password" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Nama Lengkap</label>
+              <input type="text" id="user-nama" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Role / Hak Akses</label>
+              <select id="user-role" class="form-select fw-bold">
+                <option value="Admin">Admin (Full Akses Semua Menu + Setting)</option>
+                <option value="Leader">Leader (Dashboard WO, List WO, List Report IKR)</option>
+                <option value="Team IKR">Team IKR (Dashboard WO, List Report IKR)</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-belacom" onclick="saveUserData()"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan User</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENGATURAN HARGA -->
+  <div class="modal fade" id="modalPrice" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalPriceTitle">Tambah Harga Baru</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tanggal Efektif (berlaku untuk WO dengan Tgl Visit mulai tanggal ini)</label>
+            <input type="date" id="price-tgl" class="form-control" onchange="previewPriceImpact()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tagihan WO (Rp)</label>
+            <input type="number" id="price-tagihan" class="form-control" min="0" step="1000" oninput="checkPriceBalance()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Bayar Team IKR (Rp)</label>
+            <input type="number" id="price-team" class="form-control" min="0" step="1000" oninput="checkPriceBalance()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Revenue Belacom (Rp)</label>
+            <input type="number" id="price-revenue" class="form-control" min="0" step="1000" oninput="checkPriceBalance()">
+          </div>
+          <div id="price-balance" class="small mb-2"></div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Catatan (opsional)</label>
+            <input type="text" id="price-catatan" class="form-control" placeholder="mis. Penyesuaian tarif sesuai kesepakatan">
+          </div>
+          <div id="price-impact" class="alert alert-info small py-2 mb-0" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-warning fw-bold" onclick="savePriceSettingData()"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Harga</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TEAM SETTING -->
+  <div class="modal fade" id="modalTeamSetting" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalTeamTitle">Form Team Aktivator</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formTeamSetting">
+            <input type="hidden" id="team-rowIndex">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Nama Team</label>
+              <input type="text" id="team-name" class="form-control" placeholder="Contoh: BLC-IKR03" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">PIC / Nama Teknisi</label>
+              <input type="text" id="team-pic" class="form-control" placeholder="Contoh: Eko" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">No Telepon PIC</label>
+              <input type="text" id="team-notelppic" class="form-control" placeholder="Contoh: 08123456789" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-success" onclick="saveTeamSettingData()"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Team</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT STATUS PEMBAYARAN TAGIHAN -->
+  <div class="modal fade" id="modalPayStatus" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice-dollar me-2 text-success"></i>Update Status Pembayaran</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formPayStatus">
+            <input type="hidden" id="pay-noTiket">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">No Tiket / WO</label>
+              <input type="text" id="pay-noTiketDisplay" class="form-control" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Status Pembayaran</label>
+              <select id="pay-status" class="form-select fw-bold">
+                <option value="Paid">Paid (Lunas)</option>
+                <option value="Unpaid">Unpaid (Belum Lunas)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Tanggal Pembayaran</label>
+              <input type="date" id="pay-tgl" class="form-control">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-success" onclick="savePaymentStatus()"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Status</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL WO BARU / EDIT -->
+  <div class="modal fade" id="modalWO" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalWOTitle">Form Work Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formWO">
+            <input type="hidden" id="wo-rowIndex">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label small fw-bold">No Tiket / WO</label><input type="text" id="wo-noTiket" class="form-control" required></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">ID Customer</label><input type="text" id="wo-idCust" class="form-control"></div>
+              
+              <div class="col-md-6"><label class="form-label small fw-bold">Nama Customer</label><input type="text" id="wo-nama" class="form-control" required></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">No Telepon Customer</label><input type="text" id="wo-noTelp" class="form-control" placeholder="08123456789"></div>
+
+              <div class="col-md-12"><label class="form-label small fw-bold">Alamat Lengkap</label><textarea id="wo-alamat" class="form-control" rows="2"></textarea></div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Team Aktivator</label>
+                <select id="wo-team" class="form-select" onchange="onTeamSelectChange()">
+                  <option value="">-- Pilih Team Aktivator --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">PIC / Teknisi (Centang untuk memilih)</label>
+                <div id="wo-pic-checklist" class="pic-checkbox-container">
+                  <span class="text-muted small">Pilih team terlebih dahulu</span>
+                </div>
+                <input type="hidden" id="wo-pic">
+                <small class="text-muted" style="font-size: 11px;">Anda dapat mencentang lebih dari satu teknisi.</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">No Telp PIC</label>
+                <input type="text" id="wo-notelppic" class="form-control" placeholder="Otomatis dari PIC terpilih" readonly>
+              </div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Tanggal Visit</label><input type="date" id="wo-tglVisit" class="form-control"></div>
+              
+              <div class="col-md-12">
+                <label class="form-label small fw-bold">Status Work Order</label>
+                <select id="wo-status" class="form-select">
+                  <option value="Done">Done</option>
+                  <option value="On Progress">On Progress</option>
+                  <option value="On Schedule">On Schedule</option>
+                  <option value="Reschedule">Reschedule</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Hold To Sales">Hold To Sales</option>
+                  <option value="Hold To Planning">Hold To Planning</option>
+                  <option value="Hold To Maintenance">Hold To Maintenance</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-belacom" onclick="saveWO()">Simpan Work Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FORM INPUT REPORT TEAM IKR -->
+  <div class="modal fade" id="modalReportIKR" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-clipboard-list me-2"></i>Form Report Team IKR</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+          <form id="formReportIKR">
+            <input type="hidden" id="rep-noTiket">
+            
+            <div class="row g-3 mb-3 bg-light p-2 rounded border">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-danger"><i class="fa-solid fa-list-check me-1"></i> Update Status Work Order (WO)</label>
+                <select id="rep-statusWO" class="form-select fw-bold border-danger">
+                  <option value="Done">Done</option>
+                  <option value="On Progress">On Progress</option>
+                  <option value="On Schedule">On Schedule</option>
+                  <option value="Reschedule">Reschedule</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Hold To Sales">Hold To Sales</option>
+                  <option value="Hold To Planning">Hold To Planning</option>
+                  <option value="Hold To Maintenance">Hold To Maintenance</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-danger"><i class="fa-solid id-card me-1"></i> ID Customer</label>
+                <input type="text" id="rep-idCustomer" class="form-control fw-bold border-danger" placeholder="Masukkan ID Customer">
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-danger mb-3 border-bottom pb-1">1. DATA TEKNIS ODN & BTS</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6"><label class="form-label small fw-bold">BTS</label><input type="text" id="rep-bts" class="form-control" placeholder="SEMPER"></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">ID ODN / FAT</label><input type="text" id="rep-idOdn" class="form-control" placeholder="No Label"></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Tikor Client</label><input type="text" id="rep-tikorClient" class="form-control" placeholder="-6.110872,106.919320"></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Tikor ODN</label><input type="text" id="rep-tikorOdn" class="form-control" placeholder="-6.110761,106.919879"></div>
+              <div class="col-md-3"><label class="form-label small fw-bold">Port Digunakan</label><input type="text" id="rep-portUsed" class="form-control" placeholder="2"></div>
+              <div class="col-md-3"><label class="form-label small fw-bold">Port Kosong</label><input type="text" id="rep-portEmpty" class="form-control" placeholder="4"></div>
+              <div class="col-md-3"><label class="form-label small fw-bold">Power FAT (dBm)</label><input type="text" id="rep-powerFat" class="form-control" placeholder="-14.20"></div>
+              <div class="col-md-3"><label class="form-label small fw-bold">Power Indoor (dBm)</label><input type="text" id="rep-powerIndoor" class="form-control" placeholder="-15.00"></div>
+            </div>
+
+            <h6 class="fw-bold text-danger mb-3 border-bottom pb-1">2. SPESIFIKASI ONT</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4"><label class="form-label small fw-bold">Brand ONT</label><input type="text" id="rep-ontBrand" class="form-control" placeholder="VSOL"></div>
+              <div class="col-md-4"><label class="form-label small fw-bold">SN PON</label><input type="text" id="rep-snPon" class="form-control" placeholder="GPON00C948B2"></div>
+              <div class="col-md-4"><label class="form-label small fw-bold">SN ONT</label><input type="text" id="rep-snOnt" class="form-control" placeholder="V26040210989"></div>
+            </div>
+
+            <h6 class="fw-bold text-danger mb-3 border-bottom pb-1">3. PEMAKAIAN MATERIAL</h6>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4"><label class="form-label small fw-bold">Panjang Kabel DW (Meter)</label><input type="number" id="rep-kabel" class="form-control" placeholder="100"></div>
+              <div class="col-md-4"><label class="form-label small fw-bold">Segitiga Ulir (Pcs)</label><input type="number" id="rep-segitiga" class="form-control" placeholder="1"></div>
+              <div class="col-md-4"><label class="form-label small fw-bold">S-Clamp (Pcs)</label><input type="number" id="rep-sclamp" class="form-control" placeholder="2"></div>
+            </div>
+
+            <h6 class="fw-bold text-danger mb-3 border-bottom pb-1">4. DOKUMENTASI FOTO (12 FOTO)</h6>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto Power OPM FAT</label><input type="file" id="file-powerFat" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-powerFat"><div id="preview-powerFat" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto Power OPM Indoor</label><input type="file" id="file-powerIndoor" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-powerIndoor"><div id="preview-powerIndoor" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto S-Clamp FAT</label><input type="file" id="file-sclampFat" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-sclampFat"><div id="preview-sclampFat" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto S-Clamp Rumah</label><input type="file" id="file-sclampRumah" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-sclampRumah"><div id="preview-sclampRumah" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto Before ODP</label><input type="file" id="file-beforeOdp" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-beforeOdp"><div id="preview-beforeOdp" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto After ODP</label><input type="file" id="file-afterOdp" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-afterOdp"><div id="preview-afterOdp" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto ONT Set</label><input type="file" id="file-ontSet" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-ontSet"><div id="preview-ontSet" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto ONT SN</label><input type="file" id="file-ontSn" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-ontSn"><div id="preview-ontSn" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto Speedtest</label><input type="file" id="file-speedtest" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-speedtest"><div id="preview-speedtest" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto CPE ON</label><input type="file" id="file-cpeOn" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-cpeOn"><div id="preview-cpeOn" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto BA Customer</label><input type="file" id="file-baCustomer" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-baCustomer"><div id="preview-baCustomer" class="mt-1"></div></div>
+              <div class="col-md-6"><label class="form-label small fw-bold">Foto Customer BA</label><input type="file" id="file-customerBa" class="form-control form-control-sm" accept="image/*"><input type="hidden" id="url-customerBa"><div id="preview-customerBa" class="mt-1"></div></div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="button" id="btn-save-report" class="btn btn-belacom" onclick="processAndSaveReport()">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PREVIEW WA -->
+  <div class="modal fade" id="modalWA" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="fa-brands fa-whatsapp text-success me-2"></i>Kirim Report via WhatsApp</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <textarea id="wa-text-area" class="form-control font-monospace" rows="16"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+          <button type="button" class="btn btn-success" onclick="openWhatsApp()"><i class="fa-brands fa-whatsapp me-1"></i> Buka WhatsApp Web</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/gas-shim.js"></script>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+    }
+
+    let teamsSettingData = [];
+    let teamModalSetting = null;
+
+    function loadSettingData() {
+      loadUsersList();
+      loadTeamsSettingList();
+      loadPriceSettings();
+    }
+
+    function loadTeamsSettingList() {
+      google.script.run.withSuccessHandler(teams => {
+        teamsSettingData = teams || [];
+        let html = '';
+        if (teams.length === 0) {
+          html = '<tr><td colspan="4" class="text-center py-3">Tidak ada data team.</td></tr>';
+        } else {
+          teams.forEach(t => {
+            html += `
+              <tr>
+                <td><strong>${t.teamName}</strong></td>
+                <td>${t.picName}</td>
+                <td>${t.noTelpPic || '-'}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-primary me-1" onclick="editTeamRow('${t.rowIndex}')" title="Edit Team"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTeamSettingRow('${t.rowIndex}')" title="Hapus Team"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+        document.getElementById('tb-teams-setting').innerHTML = html;
+      }).getTeamsManagementList();
+    }
+
+    function openTeamModal() {
+      document.getElementById('formTeamSetting').reset();
+      document.getElementById('team-rowIndex').value = '';
+      document.getElementById('modalTeamTitle').innerText = 'Tambah Team Aktivator Baru';
+      if(!teamModalSetting) teamModalSetting = new bootstrap.Modal(document.getElementById('modalTeamSetting'));
+      teamModalSetting.show();
+    }
+
+    function editTeamRow(rowIdx) {
+      const t = teamsSettingData.find(item => String(item.rowIndex) === String(rowIdx));
+      if (!t) return;
+      document.getElementById('team-rowIndex').value = t.rowIndex;
+      document.getElementById('team-name').value = t.teamName;
+      document.getElementById('team-pic').value = t.picName;
+      document.getElementById('team-notelppic').value = t.noTelpPic || '';
+      document.getElementById('modalTeamTitle').innerText = 'Edit Team Aktivator';
+      if(!teamModalSetting) teamModalSetting = new bootstrap.Modal(document.getElementById('modalTeamSetting'));
+      teamModalSetting.show();
+    }
+
+    function saveTeamSettingData() {
+      const tData = {
+        rowIndex: document.getElementById('team-rowIndex').value,
+        teamName: document.getElementById('team-name').value,
+        picName: document.getElementById('team-pic').value,
+        noTelpPic: document.getElementById('team-notelppic').value
+      };
+      google.script.run.withSuccessHandler(res => {
+        if (res.success) {
+          teamModalSetting.hide();
+          loadTeamsSettingList();
+          loadTeamsDropdown(); 
+        } else {
+          alert(res.message);
+        }
+      }).saveTeamData(tData);
+    }
+
+    function deleteTeamSettingRow(rowIdx) {
+      if (confirm('Yakin ingin menghapus team ini dari sistem?')) {
+        google.script.run.withSuccessHandler(() => {
+          loadTeamsSettingList();
+          loadTeamsDropdown();
+        }).deleteTeamRow(rowIdx);
+      }
+    }
+
+    // ===== PENGATURAN HARGA (TANGGAL EFEKTIF) =====
+    let priceModal = null;
+    let priceData = [];
+
+    function priceEsc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function priceFmtDate(k) {
+      if (!k) return '-';
+      const p = String(k).split('-');
+      return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : k;
+    }
+
+    function loadPriceSettings() {
+      google.script.run
+        .withSuccessHandler(list => {
+          priceData = list || [];
+          const tb = document.getElementById('tb-prices');
+          if (!priceData.length) {
+            tb.innerHTML = '<tr><td colspan="7" class="text-center py-3">Belum ada pengaturan harga.</td></tr>';
+            return;
+          }
+          const badge = { 'Berlaku': 'bg-success', 'Terjadwal': 'bg-warning text-dark', 'Riwayat': 'bg-secondary' };
+          tb.innerHTML = priceData.map(p => `
+            <tr>
+              <td><strong>${p.isBase ? 'Sejak awal' : priceFmtDate(p.tglEfektif)}</strong></td>
+              <td><span class="badge ${badge[p.status] || 'bg-secondary'}">${p.status}</span></td>
+              <td class="text-end">${formatRupiah(p.tagihan)}</td>
+              <td class="text-end">${formatRupiah(p.team)}</td>
+              <td class="text-end">${formatRupiah(p.revenue)}</td>
+              <td class="small">${priceEsc(p.catatan) || '-'}<br><span class="text-muted">${priceEsc(p.diubahOleh)} ${priceEsc(p.diubahPada)}</span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="openPriceModal('${p.tglEfektif}')" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                ${p.isBase ? '' : `<button class="btn btn-sm btn-outline-danger" onclick="deletePriceRow('${p.tglEfektif}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>`}
+              </td>
+            </tr>`).join('');
+        })
+        .withFailureHandler(err => alert('Gagal memuat harga: ' + err.message))
+        .getPriceSettings();
+    }
+
+    function openPriceModal(eff) {
+      if (!priceModal) priceModal = new bootstrap.Modal(document.getElementById('modalPrice'));
+      const cur = eff ? priceData.find(p => p.tglEfektif === eff) : null;
+      const base = cur || priceData.find(p => p.status === 'Berlaku') || priceData[0] || {};
+      document.getElementById('modalPriceTitle').innerText = cur ? 'Edit Harga' : 'Tambah Harga Baru';
+      document.getElementById('price-tgl').value = cur ? cur.tglEfektif : new Date().toISOString().split('T')[0];
+      document.getElementById('price-tgl').disabled = !!cur;
+      document.getElementById('price-tagihan').value = base.tagihan ?? '';
+      document.getElementById('price-team').value = base.team ?? '';
+      document.getElementById('price-revenue').value = base.revenue ?? '';
+      document.getElementById('price-catatan').value = cur ? (cur.catatan || '') : '';
+      checkPriceBalance();
+      previewPriceImpact();
+      priceModal.show();
+    }
+
+    function checkPriceBalance() {
+      const t = Number(document.getElementById('price-tagihan').value) || 0;
+      const p = Number(document.getElementById('price-team').value) || 0;
+      const v = Number(document.getElementById('price-revenue').value) || 0;
+      const el = document.getElementById('price-balance');
+      el.innerHTML = (t === p + v)
+        ? '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Tagihan = Bayar Team + Revenue</span>'
+        : '<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>Tagihan ' + formatRupiah(t) + ' tidak sama dengan Team + Revenue (' + formatRupiah(p + v) + '). Selisih ' + formatRupiah(t - p - v) + '.</span>';
+    }
+
+    function previewPriceImpact() {
+      const tgl = document.getElementById('price-tgl').value;
+      const box = document.getElementById('price-impact');
+      if (!tgl) { box.style.display = 'none'; return; }
+      google.script.run.withSuccessHandler(r => {
+        box.style.display = 'block';
+        box.innerHTML = '<i class="fa-solid fa-circle-info me-1"></i><strong>' + r.affectedWO + ' WO</strong> dengan Tgl Visit '
+          + priceFmtDate(r.from) + (r.to ? ' s/d sebelum ' + priceFmtDate(r.to) : ' dan seterusnya')
+          + ' akan memakai harga ini' + (r.paidWO ? ' (<strong>' + r.paidWO + ' sudah Paid</strong> - nominalnya di laporan akan ikut berubah)' : '') + '.';
+      }).getPriceImpact(tgl);
+    }
+
+    function savePriceSettingData() {
+      const payload = {
+        tglEfektif: document.getElementById('price-tgl').value,
+        tagihan: document.getElementById('price-tagihan').value,
+        team: document.getElementById('price-team').value,
+        revenue: document.getElementById('price-revenue').value,
+        catatan: document.getElementById('price-catatan').value,
+        updatedBy: currentUser ? currentUser.username : ''
+      };
+      if (!payload.tglEfektif) { alert('Tanggal efektif wajib diisi.'); return; }
+      if (payload.tagihan === '' || payload.team === '' || payload.revenue === '') { alert('Semua nominal wajib diisi.'); return; }
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.success) { priceModal.hide(); loadPriceSettings(); }
+          else alert(res.message);
+        })
+        .withFailureHandler(err => alert('Gagal menyimpan: ' + err.message))
+        .savePriceSetting(payload);
+    }
+
+    function deletePriceRow(eff) {
+      if (!confirm('Hapus pengaturan harga yang berlaku mulai ' + priceFmtDate(eff) + '? WO terkait akan kembali memakai harga sebelumnya.')) return;
+      google.script.run
+        .withSuccessHandler(res => { if (res.success) loadPriceSettings(); else alert(res.message); })
+        .withFailureHandler(err => alert('Gagal menghapus: ' + err.message))
+        .deletePriceSetting(eff);
+    }
+
+    let currentUser = null;
+    let woModal, waModal, reportModal, payStatusModal, userModal, dashDetailModal;
+    let teamsMasterData = [];
+    let woMasterData = [];
+    let reportMasterData = [];
+    let usersMasterData = [];
+
+    let chartStatusInstance = null;
+    let chartTeamInstance = null;
+    let chartTeamStatusInstance = null;
+
+    const photoKeys = [
+      { inputId: 'file-powerFat', hiddenId: 'url-powerFat', previewId: 'preview-powerFat', name: 'Power_FAT' },
+      { inputId: 'file-powerIndoor', hiddenId: 'url-powerIndoor', previewId: 'preview-powerIndoor', name: 'Power_Indoor' },
+      { inputId: 'file-sclampFat', hiddenId: 'url-sclampFat', previewId: 'preview-sclampFat', name: 'Sclamp_FAT' },
+      { inputId: 'file-sclampRumah', hiddenId: 'url-sclampRumah', previewId: 'preview-sclampRumah', name: 'Sclamp_Rumah' },
+      { inputId: 'file-beforeOdp', hiddenId: 'url-beforeOdp', previewId: 'preview-beforeOdp', name: 'Before_ODP' },
+      { inputId: 'file-afterOdp', hiddenId: 'url-afterOdp', previewId: 'preview-afterOdp', name: 'After_ODP' },
+      { inputId: 'file-ontSet', hiddenId: 'url-ontSet', previewId: 'preview-ontSet', name: 'ONT_Set' },
+      { inputId: 'file-ontSn', hiddenId: 'url-ontSn', previewId: 'preview-ontSn', name: 'ONT_SN' },
+      { inputId: 'file-speedtest', hiddenId: 'url-speedtest', previewId: 'preview-speedtest', name: 'Speedtest' },
+      { inputId: 'file-cpeOn', hiddenId: 'url-cpeOn', previewId: 'preview-cpeOn', name: 'CPE_ON' },
+      { inputId: 'file-baCustomer', hiddenId: 'url-baCustomer', previewId: 'preview-baCustomer', name: 'BA_Customer' },
+      { inputId: 'file-customerBa', hiddenId: 'url-customerBa', previewId: 'preview-customerBa', name: 'Customer_BA' }
+    ];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      woModal = new bootstrap.Modal(document.getElementById('modalWO'));
+      waModal = new bootstrap.Modal(document.getElementById('modalWA'));
+      reportModal = new bootstrap.Modal(document.getElementById('modalReportIKR'));
+      payStatusModal = new bootstrap.Modal(document.getElementById('modalPayStatus'));
+      userModal = new bootstrap.Modal(document.getElementById('modalUser'));
+      dashDetailModal = new bootstrap.Modal(document.getElementById('modalDashDetailWO'));
+
+      let savedUser = sessionStorage.getItem('belacom_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        initAppSession();
+      }
+    });
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-user').value;
+      const p = document.getElementById('login-pass').value;
+      const errEl = document.getElementById('login-error');
+
+      google.script.run.withSuccessHandler(res => {
+        if (res.success) {
+          currentUser = res;
+          sessionStorage.setItem('belacom_user', JSON.stringify(currentUser));
+          initAppSession();
+        } else {
+          errEl.innerText = res.message;
+          errEl.style.display = 'block';
+        }
+      }).checkUserLogin(u, p);
+    }
+
+    function logout() {
+      sessionStorage.removeItem('belacom_user');
+      currentUser = null;
+      document.getElementById('app-wrapper').style.display = 'none';
+      document.getElementById('login-container').style.display = 'flex';
+      document.getElementById('formLogin').reset();
+    }
+
+    function initAppSession() {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('app-wrapper').style.display = 'flex';
+
+      document.getElementById('user-display-name').innerText = currentUser.nama;
+      document.getElementById('user-display-role').innerText = currentUser.role;
+
+      applyRoleAccessPermissions();
+      loadGlobalTeamsDropdown();
+      loadTeamsDropdown();
+      loadDashboard();
+    }
+
+    function applyRoleAccessPermissions() {
+      const role = currentUser.role;
+      const navDashTagihan = document.getElementById('nav-dash-tagihan');
+      const navWo = document.getElementById('nav-wo');
+      const navReport = document.getElementById('nav-report');
+      const navTagihan = document.getElementById('nav-tagihan');
+      const navSetting = document.getElementById('nav-setting');
+
+      navDashTagihan.style.display = 'block';
+      navWo.style.display = 'block';
+      navReport.style.display = 'block';
+      navTagihan.style.display = 'block';
+      navSetting.style.display = 'none';
+
+      if (role === 'Admin') {
+        navSetting.style.display = 'block';
+      } else if (role === 'Leader') {
+        navDashTagihan.style.display = 'none';
+        navTagihan.style.display = 'none';
+      } else if (role === 'Team IKR') {
+        navDashTagihan.style.display = 'none';
+        navWo.style.display = 'none';
+        navTagihan.style.display = 'none';
+      }
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    }
+
+    function showSection(section) {
+      document.querySelectorAll('.page-section').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('#sidebar ul li').forEach(el => el.classList.remove('active'));
+
+      document.getElementById('sec-' + section).style.display = 'block';
+      document.getElementById('nav-' + section).classList.add('active');
+
+      const globalFilterCard = document.querySelector('.card.card-custom.p-3.mb-4.border-start');
+      if (globalFilterCard) {
+        if (section === 'setting') {
+          globalFilterCard.style.display = 'none';
+        } else {
+          globalFilterCard.style.display = 'block';
+        }
+      }
+
+      if (section === 'dashboard') loadDashboard();
+      if (section === 'dash-tagihan') loadBillingDashboard();
+      if (section === 'wo') loadWOList();
+      if (section === 'report') loadReportList();
+      if (section === 'tagihan') loadWOList();
+      if (section === 'setting') loadSettingData();
+    }
+
+    function loadGlobalTeamsDropdown() {
+      google.script.run.withSuccessHandler(teams => {
+        const selectEl = document.getElementById('global-team-activator');
+        selectEl.innerHTML = '<option value="">Semua Team</option>';
+        teams.forEach(t => {
+          selectEl.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+      }).getUniqueTeamsList();
+    }
+
+    function getGlobalFilters() {
+      return {
+        startDate: document.getElementById('global-start-date').value,
+        endDate: document.getElementById('global-end-date').value,
+        status: document.getElementById('global-status-wo').value,
+        team: document.getElementById('global-team-activator').value
+      };
+    }
+
+    function applyGlobalFilter() {
+      const activeSec = document.querySelector('.page-section:not([style*="display: none"])');
+      if (!activeSec) return;
+      const secId = activeSec.id.replace('sec-', '');
+
+      if (secId === 'dashboard') loadDashboard();
+      else if (secId === 'dash-tagihan') loadBillingDashboard();
+      else if (secId === 'wo' || secId === 'tagihan') loadWOList();
+      else if (secId === 'report') loadReportList();
+    }
+
+    function resetGlobalFilter() {
+      document.getElementById('global-start-date').value = '';
+      document.getElementById('global-end-date').value = '';
+      document.getElementById('global-status-wo').value = '';
+      document.getElementById('global-team-activator').value = '';
+      applyGlobalFilter();
+    }
+
+    function loadDashboard() {
+      let filters = getGlobalFilters();
+      google.script.run.withSuccessHandler(data => {
+        const sc = data.statusCounts || {};
+        document.getElementById('dash-total').innerText = data.totalWO || 0;
+        document.getElementById('dash-done').innerText = sc['Done'] || 0;
+        document.getElementById('dash-onprogress').innerText = sc['On Progress'] || 0;
+        document.getElementById('dash-onschedule').innerText = sc['On Schedule'] || 0;
+        document.getElementById('dash-reschedule').innerText = sc['Reschedule'] || 0;
+        document.getElementById('dash-pending').innerText = sc['Pending'] || 0;
+        document.getElementById('dash-hold-sales').innerText = sc['Hold To Sales'] || 0;
+        document.getElementById('dash-hold-planning').innerText = sc['Hold To Planning'] || 0;
+        document.getElementById('dash-hold-maint').innerText = sc['Hold To Maintenance'] || 0;
+
+        loadTeamStatusChart(filters);
+      }).getDashboardData(filters);
+    }
+
+    // Fungsi Pop-Up Detail WO saat Kartu Dashboard diklik
+    function openDashboardDetailModal(statusTarget, titleText) {
+      document.getElementById('dash-modal-title').innerText = titleText;
+      document.getElementById('tb-dash-modal-wo').innerHTML = '<tr><td colspan="7" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i> Memuat data...</td></tr>';
+      dashDetailModal.show();
+
+      let filters = getGlobalFilters();
+      google.script.run.withSuccessHandler(data => {
+        let filteredList = data || [];
+        if (statusTarget !== 'ALL') {
+          filteredList = filteredList.filter(item => item.status === statusTarget);
+        }
+
+        let html = '';
+        if (filteredList.length === 0) {
+          html = '<tr><td colspan="7" class="text-center py-4 text-muted">Tidak ada Work Order pada status ini.</td></tr>';
+        } else {
+          filteredList.forEach(item => {
+            html += `
+              <tr>
+                <td><strong>${item.noTiket || ''}</strong></td>
+                <td><strong>${item.namaCustomer || ''}</strong><br><small class="text-muted">${item.idCustomer || ''}</small></td>
+                <td>${item.noTelp || '-'}</td>
+                <td><small>${item.alamat || ''}</small></td>
+                <td><strong>${item.team || ''}</strong><br><small class="text-muted">${item.pic || '-'}</small></td>
+                <td>${item.tglVisit || ''}</td>
+                <td><span class="badge bg-secondary">${item.status || ''}</span></td>
+              </tr>
+            `;
+          });
+        }
+        document.getElementById('tb-dash-modal-wo').innerHTML = html;
+      }).getWorkOrders(filters);
+    }
+
+    function loadTeamStatusChart(filters) {
+      google.script.run.withSuccessHandler(res => {
+        const teams = res.teams || [];
+        const datasets = res.datasets || [];
+
+        const ctx = document.getElementById('chartTeamStatus').getContext('2d');
+        if (chartTeamStatusInstance) chartTeamStatusInstance.destroy();
+
+        chartTeamStatusInstance = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: teams, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+              x: { stacked: true },
+              y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+          }
+        });
+      }).getTeamStatusPerformance(filters);
+    }
+
+    function loadBillingDashboard() {
+      let filters = getGlobalFilters();
+      google.script.run.withSuccessHandler(res => {
+        const sum = res.summary || {};
+        const teamData = res.teamBilling || [];
+
+        document.getElementById('dash-bill-total').innerText = formatRupiah(sum.totalNominalTagihan);
+        document.getElementById('dash-bill-wo-count').innerText = (sum.totalWO || 0) + ' Work Order';
+        document.getElementById('dash-bill-team').innerText = formatRupiah(sum.totalPembayaranTeam);
+        document.getElementById('dash-bill-revenue').innerText = formatRupiah(sum.totalRevenueBelacom);
+
+        document.getElementById('dash-bill-paid').innerText = formatRupiah(sum.paidNominal);
+        document.getElementById('dash-bill-paid-count').innerText = (sum.paidCount || 0) + ' WO Lunas';
+
+        document.getElementById('dash-bill-unpaid').innerText = formatRupiah(sum.unpaidNominal);
+        document.getElementById('dash-bill-unpaid-count').innerText = (sum.unpaidCount || 0) + ' WO Belum Lunas';
+
+        let htmlTeam = '';
+        if (teamData.length === 0) {
+          htmlTeam = '<tr><td colspan="8" class="text-center py-4">Data pembayaran team tidak ditemukan.</td></tr>';
+        } else {
+          teamData.forEach(t => {
+            const pctPaid = t.totalWO > 0 ? Math.round((t.paidWO / t.totalWO) * 100) : 0;
+            htmlTeam += `
+              <tr>
+                <td><strong>${t.teamName}</strong></td>
+                <td class="text-center">${t.totalWO}</td>
+                <td class="text-center"><span class="badge bg-success">${t.paidWO}</span></td>
+                <td class="text-center"><span class="badge bg-danger">${t.unpaidWO}</span></td>
+                <td><strong class="text-primary">${formatRupiah(t.totalTagihan)}</strong></td>
+                <td><strong class="text-warning">${formatRupiah(t.totalTeamPay)}</strong></td>
+                <td><strong class="text-success">${formatRupiah(t.totalRevenue)}</strong></td>
+                <td class="text-center">
+                  <div class="progress" style="height: 18px;">
+                    <div class="progress-bar bg-success font-monospace" role="progressbar" style="width: ${pctPaid}%; font-size: 10px;">${pctPaid}%</div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        }
+        document.getElementById('tb-dash-team-billing').innerHTML = htmlTeam;
+
+        renderChartStatus(sum.paidCount || 0, sum.unpaidCount || 0);
+        renderChartTeam(teamData);
+
+      }).getBillingDashboardData(filters);
+    }
+
+    function renderChartStatus(paid, unpaid) {
+      const ctx = document.getElementById('chartPaymentStatus').getContext('2d');
+      if (chartStatusInstance) chartStatusInstance.destroy();
+
+      chartStatusInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Paid (Lunas)', 'Unpaid (Belum Lunas)'],
+          datasets: [{ data: [paid, unpaid], backgroundColor: ['#198754', '#dc3545'], borderWidth: 1 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    function renderChartTeam(teamData) {
+      const ctx = document.getElementById('chartTeamFinancial').getContext('2d');
+      if (chartTeamInstance) chartTeamInstance.destroy();
+
+      const labels = teamData.map(t => t.teamName);
+      const tagihanData = teamData.map(t => t.totalTagihan);
+      const teamPayData = teamData.map(t => t.totalTeamPay);
+      const revenueData = teamData.map(t => t.totalRevenue);
+
+      chartTeamInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Total Tagihan', data: tagihanData, backgroundColor: '#0d6efd' },
+            { label: 'Bayar Team', data: teamPayData, backgroundColor: '#ffc107' },
+            { label: 'Revenue Belacom', data: revenueData, backgroundColor: '#198754' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: function(value) { return 'Rp ' + (value / 1000) + 'k'; } } }
+          }
+        }
+      });
+    }
+
+    function loadWOList() {
+      let filters = getGlobalFilters();
+      google.script.run.withSuccessHandler(data => {
+        woMasterData = data || [];
+        renderWOList(woMasterData);
+        renderTagihanList(woMasterData);
+        document.getElementById('search-wo').value = '';
+        document.getElementById('search-tagihan').value = '';
+      }).getWorkOrders(filters);
+    }
+
+function renderWOList(data) {
+  let htmlWO = '';
+  if (!data || data.length === 0) {
+    htmlWO = '<tr><td colspan="8" class="text-center py-4">Data WO tidak ditemukan.</td></tr>';
+  } else {
+    data.forEach(item => {
+      htmlWO += `
+        <tr>
+          <td><strong>${item.noTiket || ''}</strong></td>
+          <td><strong>${item.namaCustomer || ''}</strong><br><small class="text-muted">${item.idCustomer || ''}</small></td>
+          <td>${item.noTelp || '-'}</td>
+          <td><small>${item.alamat || ''}</small></td>
+          <td><strong>${item.team || ''}</strong><br><small class="text-muted">${item.pic || '-'}</small></td>
+          <td>${item.tglVisit || ''}</td>
+          <td><span class="badge bg-secondary">${item.status || ''}</span></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="editWO('${item.noTiket}')" title="Edit WO"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteWO('${item.noTiket}')" title="Hapus WO"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+  document.getElementById('tb-wo').innerHTML = htmlWO;
+}
+
+function deleteWO(noTiket) {
+  if (confirm(`Apakah Anda yakin ingin menghapus Work Order dengan No Tiket: ${noTiket}?`)) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (res.success) {
+          loadWOList();
+          loadDashboard();
+          loadGlobalTeamsDropdown();
+        } else {
+          alert("Gagal menghapus WO: " + res.message);
+        }
+      })
+      .deleteWorkOrder(noTiket);
+  }
+}
+
+    function renderTagihanList(data) {
+      let htmlTagihan = '';
+      let sumWO = data ? data.length : 0;
+      let sumTagihan = 0;
+      let sumTeam = 0;
+      let sumRevenue = 0;
+
+      if (!data || data.length === 0) {
+        htmlTagihan = '<tr><td colspan="9" class="text-center py-4">Data tagihan tidak ditemukan.</td></tr>';
+      } else {
+        data.forEach(item => {
+          sumTagihan += item.nominalTagihan ?? 0;
+          sumTeam += item.pembayaranTeam ?? 0;
+          sumRevenue += item.revenueBelacom ?? 0;
+
+          htmlTagihan += `
+            <tr>
+              <td><strong>${item.noTiket || ''}</strong></td>
+              <td>${item.namaCustomer || ''}</td>
+              <td><strong>${item.team || ''}</strong></td>
+              <td><span class="fw-bold text-primary">${formatRupiah(item.nominalTagihan)}</span></td>
+              <td><span class="fw-bold text-warning">${formatRupiah(item.pembayaranTeam)}</span></td>
+              <td><span class="fw-bold text-success">${formatRupiah(item.revenueBelacom)}</span></td>
+              <td>${item.tglBayar || '-'}</td>
+              <td><span class="badge bg-${item.statusBayar === 'Paid' ? 'success' : 'secondary'}">${item.statusBayar || 'Unpaid'}</span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary" onclick="openPaymentModal('${item.noTiket}', '${item.statusBayar}', '${item.tglBayar}')">
+                  <i class="fa-solid fa-pen"></i> Status
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      document.getElementById('tb-tagihan').innerHTML = htmlTagihan;
+
+      document.getElementById('summary-total-wo').innerText = sumWO + ' WO';
+      document.getElementById('summary-total-tagihan').innerText = formatRupiah(sumTagihan);
+      document.getElementById('summary-total-team').innerText = formatRupiah(sumTeam);
+      document.getElementById('summary-total-revenue').innerText = formatRupiah(sumRevenue);
+    }
+
+    function loadReportList() {
+      let filters = getGlobalFilters();
+      google.script.run.withSuccessHandler(data => {
+        reportMasterData = data || [];
+        renderReportList(reportMasterData);
+        document.getElementById('search-report').value = '';
+      }).getReportIKRList(filters);
+    }
+
+    function renderReportList(data) {
+      let htmlRep = '';
+      if (!data || data.length === 0) {
+        htmlRep = '<tr><td colspan="8" class="text-center py-4">Data Report tidak ditemukan.</td></tr>';
+      } else {
+        data.forEach(item => {
+          htmlRep += `
+            <tr>
+              <td><strong>${item.noTiket || ''}</strong></td>
+              <td><strong>${item.namaCustomer || ''}</strong><br><small class="text-muted">${item.idCustomer || ''}</small></td>
+              <td>${item.noTelp || '-'}</td>
+              <td><small>${item.alamat || ''}</small></td>
+              <td><strong>${item.team || ''}</strong><br><small class="text-muted">${item.pic || '-'}</small></td>
+              <td>${item.tglVisit || ''}</td>
+              <td><span class="badge bg-secondary">${item.status || ''}</span></td>
+              <td class="text-center text-nowrap">
+                <button class="btn btn-sm btn-outline-primary me-1 mb-1" onclick="openReportModal('${item.noTiket}')" title="Input/Edit Report">
+                  <i class="fa-solid fa-file-pen"></i> ${item.hasReport ? 'Edit' : 'Input'}
+                </button>
+                <button class="btn btn-sm btn-outline-success me-1 mb-1" onclick="sendWA('${item.noTiket}')" title="Kirim WA">
+                  <i class="fa-brands fa-whatsapp"></i> WA
+                </button>
+                <button class="btn btn-sm btn-outline-danger mb-1" onclick="generatePDF('${item.noTiket}', this)" title="Export PDF">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      document.getElementById('tb-report').innerHTML = htmlRep;
+    }
+
+    function loadUsersList() {
+      google.script.run.withSuccessHandler(users => {
+        usersMasterData = users || [];
+        let html = '';
+        if (users.length === 0) {
+          html = '<tr><td colspan="5" class="text-center py-3">Tidak ada data user.</td></tr>';
+        } else {
+          users.forEach(u => {
+            html += `
+              <tr>
+                <td><strong>${u.username}</strong></td>
+                <td><code>${u.password}</code></td>
+                <td>${u.nama}</td>
+                <td><span class="badge bg-info text-dark">${u.role}</span></td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-primary me-1" onclick="editUserRow('${u.rowIndex}')" title="Edit User"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteUserRow('${u.rowIndex}')" title="Hapus User"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+        document.getElementById('tb-users').innerHTML = html;
+      }).getUsersList();
+    }
+
+    function openUserModal() {
+      document.getElementById('formUser').reset();
+      document.getElementById('user-rowIndex').value = '';
+      document.getElementById('modalUserTitle').innerText = 'Tambah User Sistem';
+      userModal.show();
+    }
+
+    function editUserRow(rowIdx) {
+      const u = usersMasterData.find(item => String(item.rowIndex) === String(rowIdx));
+      if (!u) return;
+      document.getElementById('user-rowIndex').value = u.rowIndex;
+      document.getElementById('user-username').value = u.username;
+      document.getElementById('user-password').value = u.password;
+      document.getElementById('user-nama').value = u.nama;
+      document.getElementById('user-role').value = u.role;
+      document.getElementById('modalUserTitle').innerText = 'Edit User Sistem';
+      userModal.show();
+    }
+
+    function saveUserData() {
+      const uData = {
+        rowIndex: document.getElementById('user-rowIndex').value,
+        username: document.getElementById('user-username').value,
+        password: document.getElementById('user-password').value,
+        nama: document.getElementById('user-nama').value,
+        role: document.getElementById('user-role').value
+      };
+      google.script.run.withSuccessHandler(res => {
+        if (res.success) {
+          userModal.hide();
+          loadUsersList();
+        } else {
+          alert(res.message);
+        }
+      }).saveUser(uData);
+    }
+
+    function deleteUserRow(rowIdx) {
+      if (confirm('Yakin ingin menghapus user ini dari sistem?')) {
+        google.script.run.withSuccessHandler(() => loadUsersList()).deleteUser(rowIdx);
+      }
+    }
+
+    function filterWO() {
+      const query = document.getElementById('search-wo').value.toLowerCase();
+      const filtered = woMasterData.filter(item => 
+        (item.noTiket && item.noTiket.toLowerCase().includes(query)) ||
+        (item.namaCustomer && item.namaCustomer.toLowerCase().includes(query)) ||
+        (item.idCustomer && item.idCustomer.toLowerCase().includes(query)) ||
+        (item.alamat && item.alamat.toLowerCase().includes(query)) ||
+        (item.team && item.team.toLowerCase().includes(query)) ||
+        (item.status && item.status.toLowerCase().includes(query))
+      );
+      renderWOList(filtered);
+    }
+
+    function filterTagihan() {
+      const query = document.getElementById('search-tagihan').value.toLowerCase();
+      const filtered = woMasterData.filter(item => 
+        (item.noTiket && item.noTiket.toLowerCase().includes(query)) ||
+        (item.namaCustomer && item.namaCustomer.toLowerCase().includes(query)) ||
+        (item.team && item.team.toLowerCase().includes(query)) ||
+        (item.statusBayar && item.statusBayar.toLowerCase().includes(query))
+      );
+      renderTagihanList(filtered);
+    }
+
+    function filterReport() {
+      const query = document.getElementById('search-report').value.toLowerCase();
+      const filtered = reportMasterData.filter(item => 
+        (item.noTiket && item.noTiket.toLowerCase().includes(query)) ||
+        (item.namaCustomer && item.namaCustomer.toLowerCase().includes(query)) ||
+        (item.team && item.team.toLowerCase().includes(query)) ||
+        (item.status && item.status.toLowerCase().includes(query))
+      );
+      renderReportList(filtered);
+    }
+
+    function loadTeamsDropdown() {
+      google.script.run.withSuccessHandler(rawTeams => {
+        teamsMasterData = [];
+        let grouped = {};
+        (rawTeams || []).forEach(t => {
+          let tName = t.teamName;
+          if (!grouped[tName]) grouped[tName] = { teamName: tName, pics: [] };
+          if (t.picName) {
+            let individualPics = t.picName.split(/[,&]/).map(p => p.trim()).filter(p => p !== '');
+            individualPics.forEach(p => {
+              if (!grouped[tName].pics.some(existing => existing.name === p)) {
+                grouped[tName].pics.push({ name: p, noTelp: t.noTelpPic || '' });
+              }
+            });
+          }
+        });
+        for (let key in grouped) teamsMasterData.push(grouped[key]);
+
+        const selectEl = document.getElementById('wo-team');
+        selectEl.innerHTML = '<option value="">-- Pilih Team Aktivator --</option>';
+        teamsMasterData.forEach(t => {
+          selectEl.innerHTML += `<option value="${t.teamName}">${t.teamName}</option>`;
+        });
+      }).getTeamsList();
+    }
+
+    function onTeamSelectChange(selectedPicValues = []) {
+      const selectedTeam = document.getElementById('wo-team').value;
+      const found = teamsMasterData.find(t => t.teamName === selectedTeam);
+      const containerEl = document.getElementById('wo-pic-checklist');
+      const notelpInput = document.getElementById('wo-notelppic');
+      
+      containerEl.innerHTML = '';
+      notelpInput.value = '';
+
+      if (!found || !found.pics || found.pics.length === 0) {
+        containerEl.innerHTML = '<span class="text-muted small">Pilih team terlebih dahulu</span>';
+        document.getElementById('wo-pic').value = '';
+        return;
+      }
+
+      found.pics.forEach((pObj, idx) => {
+        let isChecked = selectedPicValues.includes(pObj.name) ? 'checked' : '';
+        containerEl.innerHTML += `
+          <div class="form-check">
+            <input class="form-check-input pic-checkbox" type="checkbox" value="${pObj.name}" id="pic_chk_${idx}" ${isChecked} onchange="onPicCheckboxChange()">
+            <label class="form-check-label small" for="pic_chk_${idx}">${pObj.name}</label>
+          </div>
+        `;
+      });
+      onPicCheckboxChange();
+    }
+
+    function onPicCheckboxChange() {
+      const checkboxes = document.querySelectorAll('.pic-checkbox:checked');
+      const selectedTeam = document.getElementById('wo-team').value;
+      const found = teamsMasterData.find(t => t.teamName === selectedTeam);
+
+      let selectedNames = [];
+      checkboxes.forEach(chk => selectedNames.push(chk.value));
+
+      document.getElementById('wo-pic').value = selectedNames.join(', ');
+
+      if (found && found.pics) {
+        let matchingPhones = found.pics
+          .filter(pObj => selectedNames.includes(pObj.name) && pObj.noTelp)
+          .map(pObj => pObj.noTelp);
+        document.getElementById('wo-notelppic').value = matchingPhones.join(', ');
+      }
+    }
+
+    function openPaymentModal(noTiket, statusBayar, tglBayar) {
+      document.getElementById('pay-noTiket').value = noTiket;
+      document.getElementById('pay-noTiketDisplay').value = noTiket;
+      document.getElementById('pay-status').value = statusBayar || 'Unpaid';
+      document.getElementById('pay-tgl').value = tglBayar || new Date().toISOString().split('T')[0];
+      payStatusModal.show();
+    }
+
+    function savePaymentStatus() {
+      const noTiket = document.getElementById('pay-noTiket').value;
+      const statusBayar = document.getElementById('pay-status').value;
+      const tglBayar = document.getElementById('pay-tgl').value;
+
+      google.script.run.withSuccessHandler(res => {
+        if (res.success) {
+          payStatusModal.hide();
+          loadWOList();
+          loadBillingDashboard();
+        } else {
+          alert('Gagal memperbarui status: ' + res.message);
+        }
+      }).updatePaymentStatus(noTiket, statusBayar, tglBayar);
+    }
+
+    function openWOModal() {
+      document.getElementById('formWO').reset();
+      document.getElementById('wo-rowIndex').value = '';
+      document.getElementById('modalWOTitle').innerText = 'Tambah Work Order';
+      
+      const containerEl = document.getElementById('wo-pic-checklist');
+      containerEl.innerHTML = '<span class="text-muted small">Pilih team terlebih dahulu</span>';
+      document.getElementById('wo-pic').value = '';
+      document.getElementById('wo-notelppic').value = '';
+
+      woModal.show();
+    }
+
+    function editWO(noTiket) {
+      const item = woMasterData.find(w => w.noTiket === noTiket);
+      if (!item) return;
+
+      document.getElementById('wo-rowIndex').value = item.rowIndex || '';
+      document.getElementById('wo-noTiket').value = item.noTiket || '';
+      document.getElementById('wo-idCust').value = item.idCustomer || '';
+      document.getElementById('wo-nama').value = item.namaCustomer || '';
+      document.getElementById('wo-noTelp').value = item.noTelp || '';
+      document.getElementById('wo-alamat').value = item.alamat || '';
+      document.getElementById('wo-team').value = item.team || '';
+      document.getElementById('wo-notelppic').value = item.noTelpPic || '';
+      document.getElementById('wo-tglVisit').value = item.tglVisit || '';
+      document.getElementById('wo-status').value = item.status || 'Done';
+
+      let savedPics = (item.pic || '').split(',').map(s => s.trim());
+      onTeamSelectChange(savedPics);
+
+      document.getElementById('modalWOTitle').innerText = 'Edit Work Order';
+      woModal.show();
+    }
+
+    function saveWO() {
+      const woData = {
+        rowIndex: document.getElementById('wo-rowIndex').value,
+        noTiket: document.getElementById('wo-noTiket').value,
+        idCustomer: document.getElementById('wo-idCust').value,
+        namaCustomer: document.getElementById('wo-nama').value,
+        noTelp: document.getElementById('wo-noTelp').value,
+        alamat: document.getElementById('wo-alamat').value,
+        team: document.getElementById('wo-team').value,
+        pic: document.getElementById('wo-pic').value,
+        noTelpPic: document.getElementById('wo-notelppic').value,
+        tglVisit: document.getElementById('wo-tglVisit').value,
+        status: document.getElementById('wo-status').value
+      };
+
+      google.script.run.withSuccessHandler(() => {
+        woModal.hide();
+        loadWOList();
+        loadDashboard();
+        loadGlobalTeamsDropdown();
+      }).saveWorkOrder(woData);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function updatePhotoPreview(previewId, imageUrl) {
+      const el = document.getElementById(previewId);
+      if (!el) return;
+      if (imageUrl && imageUrl.trim() !== '') {
+        el.innerHTML = '<img src="' + imageUrl + '" style="height: 55px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc; object-fit: contain;" /><br><small class="text-muted" style="font-size: 10px;">Foto Tersimpan</small>';
+      } else {
+        el.innerHTML = '';
+      }
+    }
+
+    async function processAndSaveReport() {
+      const btnSave = document.getElementById('btn-save-report');
+      const originalHtml = btnSave.innerHTML;
+      btnSave.disabled = true;
+      btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Mengunggah Foto...';
+
+      const noTiket = document.getElementById('rep-noTiket').value;
+
+      try {
+        for (let item of photoKeys) {
+          const fileInput = document.getElementById(item.inputId);
+          if (fileInput && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const base64 = await fileToBase64(file);
+            const fileName = `IMG_${noTiket}_${item.name}_${new Date().getTime()}`;
+
+            const url = await new Promise((resolve, reject) => {
+              google.script.run
+                .withSuccessHandler(resolve)
+                .withFailureHandler(reject)
+                .uploadImageToDrive(base64, fileName);
+            });
+
+            document.getElementById(item.hiddenId).value = url;
+            updatePhotoPreview(item.previewId, url);
+          }
+        }
+
+        const repData = {
+          noTiket: noTiket,
+          statusWO: document.getElementById('rep-statusWO').value,
+          idCustomer: document.getElementById('rep-idCustomer').value, // Menambahkan ID Customer
+          bts: document.getElementById('rep-bts').value,
+          idOdn: document.getElementById('rep-idOdn').value,
+          tikorClient: document.getElementById('rep-tikorClient').value,
+          tikorOdn: document.getElementById('rep-tikorOdn').value,
+          portUsed: document.getElementById('rep-portUsed').value,
+          portEmpty: document.getElementById('rep-portEmpty').value,
+          powerFat: document.getElementById('rep-powerFat').value,
+          powerIndoor: document.getElementById('rep-powerIndoor').value,
+          ontBrand: document.getElementById('rep-ontBrand').value,
+          snPon: document.getElementById('rep-snPon').value,
+          snOnt: document.getElementById('rep-snOnt').value,
+          kabel: document.getElementById('rep-kabel').value,
+          segitiga: document.getElementById('rep-segitiga').value,
+          sclamp: document.getElementById('rep-sclamp').value,
+          imgPowerFat: document.getElementById('url-powerFat').value,
+          imgPowerIndoor: document.getElementById('url-powerIndoor').value,
+          imgSclampFat: document.getElementById('url-sclampFat').value,
+          imgSclampRumah: document.getElementById('url-sclampRumah').value,
+          imgBeforeOdp: document.getElementById('url-beforeOdp').value,
+          imgAfterOdp: document.getElementById('url-afterOdp').value,
+          imgOntSet: document.getElementById('url-ontSet').value,
+          imgOntSn: document.getElementById('url-ontSn').value,
+          imgSpeedtest: document.getElementById('url-speedtest').value,
+          imgCpeOn: document.getElementById('url-cpeOn').value,
+          imgBaCustomer: document.getElementById('url-baCustomer').value,
+          imgCustomerBa: document.getElementById('url-customerBa').value
+        };
+
+        google.script.run
+          .withSuccessHandler(() => {
+            btnSave.disabled = false;
+            btnSave.innerHTML = originalHtml;
+            reportModal.hide();
+            loadReportList();
+            loadWOList(); // Refresh list WO agar ID Customer ter-update secara real-time
+            loadDashboard();
+          })
+          .withFailureHandler(err => {
+            btnSave.disabled = false;
+            btnSave.innerHTML = originalHtml;
+            alert('Gagal menyimpan report: ' + err.message);
+          })
+          .saveReportIKRData(repData);
+
+      } catch (err) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = originalHtml;
+        alert('Terjadi kesalahan saat upload foto: ' + err.message);
+      }
+    }
+
+    function openReportModal(noTiket) {
+      document.getElementById('formReportIKR').reset();
+      document.getElementById('rep-noTiket').value = noTiket;
+
+      photoKeys.forEach(p => {
+        document.getElementById(p.hiddenId).value = '';
+        updatePhotoPreview(p.previewId, '');
+      });
+
+      google.script.run.withSuccessHandler(data => {
+        if (data) {
+          if (data.statusWO) {
+            document.getElementById('rep-statusWO').value = data.statusWO;
+          }
+          if (data.idCustomer) {
+            document.getElementById('rep-idCustomer').value = data.idCustomer;
+          }
+          document.getElementById('rep-bts').value = data.bts || '';
+          document.getElementById('rep-idOdn').value = data.idOdn || '';
+          document.getElementById('rep-tikorClient').value = data.tikorClient || '';
+          document.getElementById('rep-tikorOdn').value = data.tikorOdn || '';
+          document.getElementById('rep-portUsed').value = data.portUsed || '';
+          document.getElementById('rep-portEmpty').value = data.portEmpty || '';
+          document.getElementById('rep-powerFat').value = data.powerFat || '';
+          document.getElementById('rep-powerIndoor').value = data.powerIndoor || '';
+          document.getElementById('rep-ontBrand').value = data.ontBrand || '';
+          document.getElementById('rep-snPon').value = data.snPon || '';
+          document.getElementById('rep-snOnt').value = data.snOnt || '';
+          document.getElementById('rep-kabel').value = data.kabel || '';
+          document.getElementById('rep-segitiga').value = data.segitiga || '';
+          document.getElementById('rep-sclamp').value = data.sclamp || '';
+
+          const photoMap = {
+            'url-powerFat': data.imgPowerFat,
+            'url-powerIndoor': data.imgPowerIndoor,
+            'url-sclampFat': data.imgSclampFat,
+            'url-sclampRumah': data.imgSclampRumah,
+            'url-beforeOdp': data.imgBeforeOdp,
+            'url-afterOdp': data.imgAfterOdp,
+            'url-ontSet': data.imgOntSet,
+            'url-ontSn': data.imgOntSn,
+            'url-speedtest': data.imgSpeedtest,
+            'url-cpeOn': data.imgCpeOn,
+            'url-baCustomer': data.imgBaCustomer,
+            'url-customerBa': data.imgCustomerBa
+          };
+
+          photoKeys.forEach(p => {
+            const url = photoMap[p.hiddenId] || '';
+            document.getElementById(p.hiddenId).value = url;
+            updatePhotoPreview(p.previewId, url);
+          });
+        }
+        reportModal.show();
+      }).getReportDetail(noTiket);
+    }
+
+    function openReportModal(noTiket) {
+      document.getElementById('formReportIKR').reset();
+      document.getElementById('rep-noTiket').value = noTiket;
+
+      photoKeys.forEach(p => {
+        document.getElementById(p.hiddenId).value = '';
+        updatePhotoPreview(p.previewId, '');
+      });
+
+      google.script.run.withSuccessHandler(data => {
+        if (data) {
+          if (data.statusWO) {
+            document.getElementById('rep-statusWO').value = data.statusWO;
+          }
+          // Tambahkan baris ini agar ID Customer muncul otomatis di form
+          if (data.idCustomer) {
+            document.getElementById('rep-idCustomer').value = data.idCustomer;
+          } else {
+            document.getElementById('rep-idCustomer').value = '';
+          }
+
+          document.getElementById('rep-bts').value = data.bts || '';
+          document.getElementById('rep-idOdn').value = data.idOdn || '';
+          document.getElementById('rep-tikorClient').value = data.tikorClient || '';
+          document.getElementById('rep-tikorOdn').value = data.tikorOdn || '';
+          document.getElementById('rep-portUsed').value = data.portUsed || '';
+          document.getElementById('rep-portEmpty').value = data.portEmpty || '';
+          document.getElementById('rep-powerFat').value = data.powerFat || '';
+          document.getElementById('rep-powerIndoor').value = data.powerIndoor || '';
+          document.getElementById('rep-ontBrand').value = data.ontBrand || '';
+          document.getElementById('rep-snPon').value = data.snPon || '';
+          document.getElementById('rep-snOnt').value = data.snOnt || '';
+          document.getElementById('rep-kabel').value = data.kabel || '';
+          document.getElementById('rep-segitiga').value = data.segitiga || '';
+          document.getElementById('rep-sclamp').value = data.sclamp || '';
+
+          const photoMap = {
+            'url-powerFat': data.imgPowerFat,
+            'url-powerIndoor': data.imgPowerIndoor,
+            'url-sclampFat': data.imgSclampFat,
+            'url-sclampRumah': data.imgSclampRumah,
+            'url-beforeOdp': data.imgBeforeOdp,
+            'url-afterOdp': data.imgAfterOdp,
+            'url-ontSet': data.imgOntSet,
+            'url-ontSn': data.imgOntSn,
+            'url-speedtest': data.imgSpeedtest,
+            'url-cpeOn': data.imgCpeOn,
+            'url-baCustomer': data.imgBaCustomer,
+            'url-customerBa': data.imgCustomerBa
+          };
+
+          photoKeys.forEach(p => {
+            const url = photoMap[p.hiddenId] || '';
+            document.getElementById(p.hiddenId).value = url;
+            updatePhotoPreview(p.previewId, url);
+          });
+        }
+        reportModal.show();
+      }).getReportDetail(noTiket);
+    }
+
+    function sendWA(noTiket) {
+      google.script.run.withSuccessHandler(template => {
+        document.getElementById('wa-text-area').value = template;
+        waModal.show();
+      }).generateWATemplate(noTiket);
+    }
+
+    function openWhatsApp() {
+      const text = encodeURIComponent(document.getElementById('wa-text-area').value);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function generatePDF(noTiket, btn) {
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Engine...';
+
+      google.script.run
+        .withSuccessHandler(pdfUrl => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          window.open(pdfUrl, '_blank');
+        })
+        .withFailureHandler(err => {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          alert('Gagal: ' + err.message);
+        })
+        .generatePDFReport(noTiket);
+    }
+    // Fungsi untuk mendownload file hasil export Excel (CSV)
+function downloadCSVFile(base64Data, defaultFilename) {
+  const downloadLink = document.createElement("a");
+  downloadLink.href = base64Data;
+  downloadLink.download = defaultFilename;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}
+
+// Handler Export WO ke Excel
+function exportWOExcel() {
+  let filters = getGlobalFilters();
+  google.script.run
+    .withSuccessHandler(base64 => {
+      downloadCSVFile(base64, "Data_Work_Orders.csv");
+    })
+    .withFailureHandler(err => {
+      alert("Gagal export Work Order: " + err.message);
+    })
+    .exportWorkOrdersToExcel(filters);
+}
+
+// Handler Export Report IKR ke Excel
+function exportReportExcel() {
+  let filters = getGlobalFilters();
+    google.script.run
+    .withSuccessHandler(base64 => {
+      downloadCSVFile(base64, "Data_Report_IKR.csv");
+    })
+    .withFailureHandler(err => {
+      alert("Gagal export Report IKR: " + err.message);
+    })
+    .exportReportIKRToExcel(filters);
+}
+  </script>
+</body>
+</html>
